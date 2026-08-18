@@ -4,6 +4,7 @@ import FilterCard from '../components/FilterCard'
 import JobCard from '../components/JobCard'
 import { useApp } from '@/context/AppContext'
 import useGetAllJobs from '@/hooks/useGetAllJobs'
+import { motion } from 'framer-motion'
 
 const Jobs = () => {
     useGetAllJobs();
@@ -41,9 +42,15 @@ const Jobs = () => {
                                 <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4'>
                                     {
                                         filterJobs.map((job) => (
-                                            <div key={job?._id}>
+                                            <motion.div
+                                                initial={{ opacity: 0, x: 100 }}
+                                                animate={{ opacity: 1, x: 0 }}
+                                                exit={{ opacity: 0, x: -100 }}
+                                                transition={{ duration: 0.3 }}
+                                                key={job?._id}
+                                            >
                                                 <JobCard job={job} />
-                                            </div>
+                                            </motion.div>
                                         ))
                                     }
                                 </div>

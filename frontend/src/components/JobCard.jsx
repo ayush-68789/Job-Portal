@@ -4,6 +4,7 @@ import { Bookmark } from 'lucide-react'
 import { Avatar, AvatarImage } from './ui/avatar'
 import { Badge } from './ui/badge'
 import { useNavigate } from 'react-router-dom'
+import { motion } from 'framer-motion'
 
 const JobCard = ({ job }) => {
     const navigate = useNavigate();
@@ -17,7 +18,11 @@ const JobCard = ({ job }) => {
     }
 
     return (
-        <div className='p-5 rounded-md shadow-xl bg-white border border-gray-100 flex flex-col justify-between hover:shadow-2xl transition-all duration-300'>
+        <motion.div
+            whileHover={{ y: -5 }}
+            transition={{ duration: 0.2 }}
+            className='p-5 rounded-md shadow-xl bg-white border border-gray-100 flex flex-col justify-between hover:shadow-2xl transition-all duration-300'
+        >
             <div>
                 <div className='flex items-center justify-between'>
                     <p className='text-sm text-gray-500'>
@@ -56,7 +61,7 @@ const JobCard = ({ job }) => {
                 <Button onClick={() => navigate(`/description/${job?._id}`)} variant="outline">Details</Button>
                 <Button className="bg-[#720361] hover:bg-[#5b024d] text-white">Save For Later</Button>
             </div>
-        </div>
+        </motion.div>
     )
 }
 
