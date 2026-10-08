@@ -4,6 +4,21 @@ const jwt = require("jsonwebtoken");
 const { getDataUri } = require("../utils/datauri.js");
 const { cloudinary } = require("../utils/cloudinary.js");
 
+const isProduction = process.env.NODE_ENV === 'production';
+const authCookieOptions = {
+    maxAge: 1 * 24 * 60 * 60 * 1000,
+    httpOnly: true,
+    sameSite: isProduction ? 'none' : 'lax',
+    secure: isProduction,
+    path: '/'
+};
+const authCookieClearOptions = {
+    httpOnly: true,
+    sameSite: authCookieOptions.sameSite,
+    secure: authCookieOptions.secure,
+    path: '/'
+};
+
 const getCurrentUser = async (req, res) => {
     try {
         const userRecord = await User.findById(req.id);
@@ -77,7 +92,7 @@ const register = async (req, res) => {
             profile: newUser.profile
         }
 
-        return res.status(201).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'strict', path: '/' }).json({
+        return res.status(201).cookie("token", token, authCookieOptions).json({
             message: "Account created successfully.",
             user,
             success: true
@@ -133,7 +148,7 @@ const login = async (req, res) => {
             profile: user.profile
         }
 
-        return res.status(200).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'strict', path: '/' }).json({
+        return res.status(200).cookie("token", token, authCookieOptions).json({
             message: `Welcome back ${user.fullname}`,
             user,
             success: true
@@ -145,7 +160,7 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
     try {
-        return res.status(200).clearCookie("token", { httpOnly: true, sameSite: 'strict', path: '/' }).json({
+        return res.status(200).clearCookie("token", authCookieClearOptions).json({
             message: "Logged out successfully.",
             success: true
         })
