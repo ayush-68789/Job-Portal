@@ -16,6 +16,16 @@ const jobSchema = new mongoose.Schema({
         type: Number,
         required: true
     },
+    salaryUnit: {
+        type: String,
+        enum: ['INR', 'LPA'],
+        default: 'LPA'
+    },
+    salaryPeriod: {
+        type: String,
+        enum: ['month', 'year'],
+        default: 'year'
+    },
     experienceLevel: {
         type: Number,
         required: true,
@@ -31,6 +41,10 @@ const jobSchema = new mongoose.Schema({
     position: {
         type: Number,
         required: true
+    },
+    isOpen: {
+        type: Boolean,
+        default: true
     },
     company: {
         type: mongoose.Schema.Types.ObjectId,
