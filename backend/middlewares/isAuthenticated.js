@@ -20,6 +20,10 @@ const isAuthenticated = async (req, res, next) => {
         next();
     } catch (error) {
         console.log(error);
+        return res.status(401).clearCookie("token", { path: '/' }).json({
+            message: "Session expired. Please log in again.",
+            success: false,
+        });
     }
 }
 

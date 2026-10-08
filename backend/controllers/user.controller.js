@@ -4,6 +4,27 @@ const jwt = require("jsonwebtoken");
 const { getDataUri } = require("../utils/datauri.js");
 const { cloudinary } = require("../utils/cloudinary.js");
 
+const getCurrentUser = async (req, res) => {
+    try {
+        const userRecord = await User.findById(req.id);
+        if (!userRecord) {
+            return res.status(404).json({ message: "User not found.", success: false });
+        }
+        const user = {
+            _id: userRecord._id,
+            fullname: userRecord.fullname,
+            email: userRecord.email,
+            phoneNumber: userRecord.phoneNumber,
+            role: userRecord.role,
+            profile: userRecord.profile
+        };
+        return res.status(200).json({ user, success: true });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: "Failed to restore session.", success: false });
+    }
+};
+
 const register = async (req, res) => {
     try {
         const { fullname, email, phoneNumber, password, role } = req.body;
@@ -56,7 +77,7 @@ const register = async (req, res) => {
             profile: newUser.profile
         }
 
-        return res.status(201).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpsOnly: true, sameSite: 'strict' }).json({
+        return res.status(201).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'strict', path: '/' }).json({
             message: "Account created successfully.",
             user,
             success: true
@@ -112,7 +133,7 @@ const login = async (req, res) => {
             profile: user.profile
         }
 
-        return res.status(200).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpsOnly: true, sameSite: 'strict' }).json({
+        return res.status(200).cookie("token", token, { maxAge: 1 * 24 * 60 * 60 * 1000, httpOnly: true, sameSite: 'strict', path: '/' }).json({
             message: `Welcome back ${user.fullname}`,
             user,
             success: true
@@ -124,7 +145,7 @@ const login = async (req, res) => {
 
 const logout = async (req, res) => {
     try {
-        return res.status(200).cookie("token", "", { maxAge: 0 }).json({
+        return res.status(200).clearCookie("token", { httpOnly: true, sameSite: 'strict', path: '/' }).json({
             message: "Logged out successfully.",
             success: true
         })
@@ -187,4 +208,4 @@ const updateProfile = async (req, res) => {
     }
 }
 
-module.exports = { register, login, logout, updateProfile };
+module.exports = { register, login, logout, updateProfile, getCurrentUser };

@@ -3,24 +3,39 @@ const { Job } = require("../models/Job.js");
 // recruiter creates job
 const postJob = async (req, res) => {
     try {
-        const { title, description, requirements, salary, location, jobType, experience, position, companyId } = req.body;
+        const { title, description, requirements, salary, salaryUnit = 'LPA', salaryPeriod = 'year', location, jobType, experience, position, companyId } = req.body;
         const userId = req.id;
 
-        if (!title || !description || !requirements || !salary || !location || !jobType || !experience || !position || !companyId) {
+        if (!title || !description || !requirements || salary === undefined || salary === '' || !location || !jobType || !experience || !position || !companyId) {
             return res.status(400).json({
                 message: "Something is missing.",
                 success: false
             });
         }
 
+        const salaryAmount = Number(salary);
+        if (!Number.isFinite(salaryAmount) || salaryAmount <= 0 || !['INR', 'LPA'].includes(salaryUnit) || !['month', 'year'].includes(salaryPeriod)) {
+            return res.status(400).json({ message: 'Enter a valid salary amount and pay period.', success: false });
+        }
+
+        // The form accepts useful labels such as "2 - 4 years". Store the
+        // lower bound as the numeric experience level used by the model.
+        const experienceMatch = String(experience).match(/\d+(?:\.\d+)?/);
+        const experienceLevel = experienceMatch ? Number(experienceMatch[0]) : NaN;
+        if (!Number.isFinite(experienceLevel)) {
+            return res.status(400).json({ message: 'Enter experience as years, for example "2 - 4 years" or "0" for entry level.', success: false });
+        }
+
         const job = await Job.create({
             title,
             description,
             requirements: Array.isArray(requirements) ? requirements : requirements.split(",").map(r => r.trim()),
-            salary: Number(salary),
+            salary: salaryAmount,
+            salaryUnit,
+            salaryPeriod,
             location,
             jobType,
-            experienceLevel: Number(experience),
+            experienceLevel,
             position: Number(position),
             company: companyId,
             created_by: userId
@@ -44,23 +59,20 @@ const postJob = async (req, res) => {
 const getAllJobs = async (req, res) => {
     try {
         const keyword = req.query.keyword || "";
-        const query = {
+        const safeKeyword = keyword.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+        const query = keyword ? {
             $or: [
-                { title: { $regex: keyword, $options: "i" } },
-                { description: { $regex: keyword, $options: "i" } },
+                { title: { $regex: safeKeyword, $options: "i" } },
+                { description: { $regex: safeKeyword, $options: "i" } },
+                { location: { $regex: safeKeyword, $options: "i" } },
+                { jobType: { $regex: safeKeyword, $options: "i" } },
+                { requirements: { $regex: safeKeyword, $options: "i" } },
             ]
-        };
+        } : {};
         const jobs = await Job.find(query).populate({
             path: "company"
         }).sort({ createdAt: -1 });
 
-        if (!jobs || jobs.length === 0) {
-            return res.status(404).json({
-                message: "Jobs not found.",
-                jobs: [],
-                success: false
-            });
-        }
         return res.status(200).json({
             jobs,
             success: true
@@ -132,6 +144,29 @@ const getAdminJobs = async (req, res) => {
     }
 };
 
+// recruiter opens or closes one of their own job listings
+const toggleJobStatus = async (req, res) => {
+    try {
+        const job = await Job.findOne({ _id: req.params.id, created_by: req.id });
+        if (!job) {
+            return res.status(404).json({ message: 'Job not found.', success: false });
+        }
+
+        // Older jobs without isOpen are considered open by the UI.
+        job.isOpen = job.isOpen === false;
+        await job.save();
+
+        return res.status(200).json({
+            message: `Job ${job.isOpen ? 'reopened' : 'closed'} successfully.`,
+            isOpen: job.isOpen,
+            success: true
+        });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Failed to update job status.', success: false });
+    }
+};
+
 // recruiter deletes a job
 const deleteJob = async (req, res) => {
     try {
@@ -161,5 +196,6 @@ module.exports = {
     getAllJobs,
     getJobById,
     getAdminJobs,
+    toggleJobStatus,
     deleteJob
 };
