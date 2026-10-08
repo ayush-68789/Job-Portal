@@ -1,4 +1,5 @@
 const { Job } = require("../models/Job.js");
+const { Company } = require("../models/company.model.js");
 
 // recruiter creates job
 const postJob = async (req, res) => {
@@ -144,6 +145,53 @@ const getAdminJobs = async (req, res) => {
     }
 };
 
+// recruiter updates an existing job they own
+const updateJob = async (req, res) => {
+    try {
+        const { title, description, requirements, salary, salaryUnit, salaryPeriod, location, jobType, experience, position, companyId } = req.body;
+        if (!title || !description || !requirements || salary === undefined || salary === '' || !location || !jobType || !experience || position === undefined || !companyId) {
+            return res.status(400).json({ message: 'Complete all job fields before saving.', success: false });
+        }
+
+        const salaryAmount = Number(salary);
+        const experienceMatch = String(experience).match(/\d+(?:\.\d+)?/);
+        const experienceLevel = experienceMatch ? Number(experienceMatch[0]) : NaN;
+        const positionCount = Number(position);
+        if (!Number.isFinite(salaryAmount) || salaryAmount <= 0 || !['INR', 'LPA'].includes(salaryUnit) || !['month', 'year'].includes(salaryPeriod)) {
+            return res.status(400).json({ message: 'Enter a valid salary amount and pay period.', success: false });
+        }
+        if (!Number.isFinite(experienceLevel) || !Number.isInteger(positionCount) || positionCount < 1) {
+            return res.status(400).json({ message: 'Enter a valid experience and number of positions.', success: false });
+        }
+
+        const [job, company] = await Promise.all([
+            Job.findOne({ _id: req.params.id, created_by: req.id }),
+            Company.findOne({ _id: companyId, userId: req.id })
+        ]);
+        if (!job) return res.status(404).json({ message: 'Job not found.', success: false });
+        if (!company) return res.status(400).json({ message: 'Select one of your registered companies.', success: false });
+
+        job.title = title.trim();
+        job.description = description.trim();
+        job.requirements = Array.isArray(requirements) ? requirements : String(requirements).split(',').map(item => item.trim()).filter(Boolean);
+        job.salary = salaryAmount;
+        job.salaryUnit = salaryUnit;
+        job.salaryPeriod = salaryPeriod;
+        job.location = location.trim();
+        job.jobType = jobType.trim();
+        job.experienceLevel = experienceLevel;
+        job.position = positionCount;
+        job.company = company._id;
+        await job.save();
+        await job.populate('company');
+
+        return res.status(200).json({ message: 'Job updated successfully.', job, success: true });
+    } catch (error) {
+        console.log(error);
+        return res.status(500).json({ message: 'Failed to update job.', success: false });
+    }
+};
+
 // recruiter opens or closes one of their own job listings
 const toggleJobStatus = async (req, res) => {
     try {
@@ -196,6 +244,7 @@ module.exports = {
     getAllJobs,
     getJobById,
     getAdminJobs,
+    updateJob,
     toggleJobStatus,
     deleteJob
 };
