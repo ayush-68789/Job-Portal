@@ -2,6 +2,7 @@ import React from 'react'
 import { Badge } from './ui/badge'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { formatSalary } from '@/utils/salary'
 
 const LatestJobCards = ({ job }) => {
     const navigate = useNavigate();
@@ -23,7 +24,7 @@ const LatestJobCards = ({ job }) => {
             <div className='flex items-center gap-2 mt-4 flex-wrap'>
                 <Badge className={'text-blue-700 font-bold'} variant="ghost">{job?.position} Positions</Badge>
                 <Badge className={'text-[#F83002] font-bold'} variant="ghost">{job?.jobType}</Badge>
-                <Badge className={'text-[#720361] font-bold'} variant="ghost">{job?.salary} LPA</Badge>
+                <Badge className={'text-[#720361] font-bold'} variant="ghost">{formatSalary(job)}</Badge>
             </div>
         </motion.div>
     )

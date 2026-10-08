@@ -7,7 +7,7 @@ import { Loader2 } from 'lucide-react'
 import { useApp } from '@/context/AppContext'
 import axios from 'axios'
 import { USER_API_END_POINT } from '@/utils/constant'
-import { toast } from 'sonner'
+import { toast } from 'react-toastify'
 
 const UpdateProfileDialog = ({ open, setOpen }) => {
     const [loading, setLoading] = useState(false);

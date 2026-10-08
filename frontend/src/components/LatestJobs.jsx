@@ -1,24 +1,23 @@
 import React from 'react'
-import LatestJobCards from './LatestJobCards'
+import { useNavigate } from 'react-router-dom'
 import { useApp } from '@/context/AppContext'
+import { ArrowRight, Building2, MapPin } from 'lucide-react'
+import { formatSalary } from '@/utils/salary'
 
 const LatestJobs = () => {
     const { allJobs } = useApp();
+    const navigate = useNavigate();
+    const jobs = allJobs?.slice(0, 8) || [];
 
-    return (
-        <div className='max-w-7xl mx-auto my-20'>
-            <h1 className='text-4xl font-bold'><span className='text-[#6A38C2]'>Latest & Top </span> Job Openings</h1>
-            <div className='grid grid-cols-3 gap-4 my-5'>
-                {
-                    allJobs && allJobs.length > 0 ? (
-                        allJobs.slice(0, 6).map((job) => <LatestJobCards key={job._id} job={job} />)
-                    ) : (
-                        <span>No Job Available</span>
-                    )
-                }
-            </div>
-        </div>
-    )
+    return <section className="content-section jobs-section" id="featured-jobs">
+        <div className="section-heading"><div><span className="section-kicker">EXPLORE OPEN ROLES</span><h2>Trending jobs</h2><p>Current opportunities posted by companies on JobPortal.</p></div><button className="text-link" onClick={() => navigate('/jobs')}>View all jobs <ArrowRight size={16} /></button></div>
+        {jobs.length ? <div className="featured-grid">{jobs.map((job) => <article className="featured-card" key={job._id} onClick={() => navigate(`/description/${job._id}`)}>
+            <div className="job-card-top"><div className="company-mark">{job.company?.logo ? <img src={job.company.logo} alt="" /> : <Building2 size={21} />}</div><span className="job-age">{job.createdAt ? `${Math.max(0, Math.floor((Date.now() - new Date(job.createdAt)) / 86400000)) === 0 ? 'Today' : `${Math.floor((Date.now() - new Date(job.createdAt)) / 86400000)} days ago`}` : 'Recently posted'}</span></div>
+            <h3>{job.title}</h3><p className="company-name">{job.company?.name || 'Company'}</p><div className="job-location"><MapPin size={14} />{job.location || 'Location not specified'}</div>
+            <div className="job-tags">{job.jobType && <span>{job.jobType}</span>}{job.position && <span>{job.position} openings</span>}{job.salary !== undefined && <span>{formatSalary(job)}</span>}</div>
+            <div className="job-card-link">View details <ArrowRight size={15} /></div>
+        </article>)}</div> : <div className="empty-jobs"><Building2 size={26} /><strong>No job listings yet</strong><span>New openings will appear here when a company posts them.</span></div>}
+    </section>
 }
 
 export default LatestJobs

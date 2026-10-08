@@ -1,45 +1,29 @@
 import React from 'react'
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from './ui/carousel'
-import { Button } from './ui/button'
 import { useNavigate } from 'react-router-dom'
 import { useApp } from '@/context/AppContext'
+import { ArrowRight, BarChart3, BriefcaseBusiness, Code2, Palette, PieChart, Settings2, UsersRound } from 'lucide-react'
 
 const categories = [
-    "Frontend Developer",
-    "Backend Developer",
-    "Data Science",
-    "Graphic Designer",
-    "FullStack Developer",
-    "DevOps Engineer",
-    "Mobile App Developer"
+    { name: 'IT & Software', query: 'Developer', icon: Code2 },
+    { name: 'Marketing', query: 'Marketing', icon: BriefcaseBusiness },
+    { name: 'Sales', query: 'Sales', icon: BarChart3 },
+    { name: 'Design', query: 'Designer', icon: Palette },
+    { name: 'Finance', query: 'Finance', icon: PieChart },
+    { name: 'HR & Admin', query: 'HR', icon: UsersRound },
+    { name: 'Engineering', query: 'Engineer', icon: Settings2 },
 ]
 
 const CategoryCarousel = () => {
     const { setSearchedQuery } = useApp();
     const navigate = useNavigate();
+    const searchJobHandler = (query) => { setSearchedQuery(query); navigate('/browse'); }
 
-    const searchJobHandler = (query) => {
-        setSearchedQuery(query);
-        navigate("/browse");
-    }
-
-    return (
-        <div>
-            <Carousel className="w-full max-w-xl mx-auto my-20">
-                <CarouselContent>
-                    {
-                        categories.map((cat, index) => (
-                            <CarouselItem key={index} className="md:basis-1/2 lg:basis-1/3">
-                                <Button onClick={() => searchJobHandler(cat)} variant="outline" className="rounded-full">{cat}</Button>
-                            </CarouselItem>
-                        ))
-                    }
-                </CarouselContent>
-                <CarouselPrevious />
-                <CarouselNext />
-            </Carousel>
+    return <section className="home-category-section">
+        <div className="home-category-inner">
+            <div className="category-heading"><span className="section-kicker">EXPLORE JOBS</span><h2>What are you looking for today?</h2><p>Choose an area and explore related opportunities.</p></div>
+            <div className="category-pill-list">{categories.map(({ name, query, icon: Icon }) => <button className="category-pill" key={name} onClick={() => searchJobHandler(query)}><Icon size={16} />{name}<ArrowRight size={13} /></button>)}</div>
         </div>
-    )
+    </section>
 }
 
 export default CategoryCarousel

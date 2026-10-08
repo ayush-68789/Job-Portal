@@ -1,13 +1,19 @@
-import React from 'react'
 import { Button } from './ui/button'
 import { Bookmark } from 'lucide-react'
 import { Avatar, AvatarImage } from './ui/avatar'
 import { Badge } from './ui/badge'
 import { useNavigate } from 'react-router-dom'
 import { motion } from 'framer-motion'
+import { formatSalary } from '@/utils/salary'
+import { useApp } from '@/context/AppContext'
 
 const JobCard = ({ job }) => {
     const navigate = useNavigate();
+    const { allAppliedJobs, user } = useApp();
+    const hasApplied = user?.role === 'student' && allAppliedJobs.some(application =>
+        String(application?.job?._id || application?.job) === String(job?._id)
+    );
+    const statusLabel = hasApplied ? 'Already applied' : job?.isOpen === false ? 'Closed' : 'Open';
 
     const daysAgoFunction = (mongodbTime) => {
         if (!mongodbTime) return 0;
@@ -21,13 +27,14 @@ const JobCard = ({ job }) => {
         <motion.div
             whileHover={{ y: -5 }}
             transition={{ duration: 0.2 }}
-            className='p-5 rounded-md shadow-xl bg-white border border-gray-100 flex flex-col justify-between hover:shadow-2xl transition-all duration-300'
+            className='job-feed-card p-5 rounded-md shadow-xl bg-white border border-gray-100 flex flex-col justify-between hover:shadow-2xl transition-all duration-300'
         >
             <div>
                 <div className='flex items-center justify-between'>
                     <p className='text-sm text-gray-500'>
                         {daysAgoFunction(job?.createdAt) === 0 ? "Today" : `${daysAgoFunction(job?.createdAt)} days ago`}
                     </p>
+                    <Badge className={`job-availability-badge ${hasApplied ? 'applied' : job?.isOpen === false ? 'closed' : 'open'}`} variant="ghost">{statusLabel}</Badge>
                     <Button variant="outline" className="rounded-full" size="icon">
                         <Bookmark className='w-4 h-4' />
                     </Button>
@@ -53,7 +60,7 @@ const JobCard = ({ job }) => {
                 <div className='flex items-center gap-2 mt-4 flex-wrap'>
                     <Badge className={'text-blue-700 font-bold'} variant="ghost">{job?.position} Positions</Badge>
                     <Badge className={'text-[#F83002] font-bold'} variant="ghost">{job?.jobType}</Badge>
-                    <Badge className={'text-[#720361] font-bold'} variant="ghost">{job?.salary} LPA</Badge>
+                    <Badge className={'text-[#720361] font-bold'} variant="ghost">{formatSalary(job)}</Badge>
                 </div>
             </div>
 

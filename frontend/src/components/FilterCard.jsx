@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from 'react'
 import { RadioGroup, RadioGroupItem } from './ui/radio-group'
 import { Label } from './ui/label'
 import { useApp } from '@/context/AppContext'
@@ -14,33 +13,27 @@ const filterData = [
     },
     {
         filterType: "Salary",
-        array: ["0-40k", "42k-1lakh", "1lakh to 5lakh", "5lakh+"]
+        array: ["₹0–40,000 / month", "₹40,000–1,00,000 / month", "₹1,00,000–5,00,000 / month", "₹5,00,000+ / month"]
     },
 ]
 
 const FilterCard = () => {
-    const [selectedValue, setSelectedValue] = useState('');
-    const { setSelectedFilter, setSearchedQuery } = useApp();
-
-    const changeHandler = (value) => {
-        setSelectedValue(value);
-    }
-
-    useEffect(() => {
-        if (setSearchedQuery) {
-            setSearchedQuery(selectedValue);
-        }
-    }, [selectedValue]);
+    const { jobFilters, setJobFilters } = useApp();
+    const filterKeys = { Location: 'location', Industry: 'industry', Salary: 'salary' };
 
     return (
         <div className='w-full bg-white p-3 rounded-md shadow-sm border border-gray-100'>
             <h1 className='font-bold text-lg'>Filter Jobs</h1>
             <hr className='mt-3' />
-            <RadioGroup value={selectedValue} onValueChange={changeHandler}>
-                {
-                    filterData.map((data, index) => (
-                        <div key={index}>
-                            <h1 className='font-bold text-base mt-3'>{data.filterType}</h1>
+            {
+                filterData.map((data, index) => {
+                    const filterKey = filterKeys[data.filterType];
+                    return <div key={data.filterType}>
+                            <div className='flex items-center justify-between mt-3'>
+                                <h2 className='font-bold text-base'>{data.filterType}</h2>
+                                {jobFilters[filterKey] && <button type='button' className='text-xs text-blue-600' onClick={() => setJobFilters(current => ({ ...current, [filterKey]: '' }))}>Clear</button>}
+                            </div>
+                            <RadioGroup value={jobFilters[filterKey]} onValueChange={value => setJobFilters(current => ({ ...current, [filterKey]: value }))}>
                             {
                                 data.array.map((item, idx) => {
                                     const itemId = `id${index}-${idx}`
@@ -52,10 +45,10 @@ const FilterCard = () => {
                                     )
                                 })
                             }
+                            </RadioGroup>
                         </div>
-                    ))
-                }
-            </RadioGroup>
+                })
+            }
         </div>
     )
 }

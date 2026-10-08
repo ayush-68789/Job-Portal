@@ -1,19 +1,21 @@
-import React from 'react'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { MoreHorizontal } from 'lucide-react';
 import { useApp } from '@/context/AppContext';
-import { toast } from 'sonner';
+import { toast } from 'react-toastify';
 import { APPLICATION_API_END_POINT } from '@/utils/constant';
 import axios from 'axios';
+import { useState } from 'react';
 
 const shortlistingStatus = ["Accepted", "Rejected"];
 
 const ApplicantsTable = () => {
     const { applicants, setAllApplicants } = useApp();
+    const [updatingId, setUpdatingId] = useState(null);
 
     const statusHandler = async (status, id) => {
         try {
+            setUpdatingId(id);
             axios.defaults.withCredentials = true;
             const res = await axios.post(`${APPLICATION_API_END_POINT}/status/${id}/update`, { status });
             if (res.data.success) {
@@ -29,6 +31,8 @@ const ApplicantsTable = () => {
             }
         } catch (error) {
             toast.error(error.response?.data?.message || "An error occurred");
+        } finally {
+            setUpdatingId(null);
         }
     }
 
@@ -52,39 +56,40 @@ const ApplicantsTable = () => {
 
     return (
         <div>
-            <Table>
-                <TableCaption>A list of your recent applied user</TableCaption>
+            <div className="applicants-table-wrap">
+            <Table className="applicants-table">
+                <TableCaption>{applicants?.applications?.length ? 'Applicant details and review status' : 'No applicants have applied for this job yet.'}</TableCaption>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>FullName</TableHead>
+                        <TableHead>Candidate</TableHead>
                         <TableHead>Email</TableHead>
-                        <TableHead>Contact</TableHead>
-                        <TableHead>Date</TableHead>
+                        <TableHead>Phone</TableHead>
+                        <TableHead>Applied</TableHead>
                         <TableHead>Status</TableHead>
                         <TableHead className="text-right">Action</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {
-                        applicants && applicants?.applications?.map((item) => (
+                        applicants?.applications?.map((item) => (
                             <TableRow key={item._id} className={getRowStyle(item?.status)}>
-                                <TableCell>{item?.applicant?.fullname}</TableCell>
-                                <TableCell>{item?.applicant?.email}</TableCell>
-                                <TableCell>{item?.applicant?.phoneNumber}</TableCell>
-                                <TableCell>{item?.applicant.createdAt.split("T")[0]}</TableCell>
+                                <TableCell><div className="applicant-candidate"><span className="applicant-initial">{item?.applicant?.fullname?.charAt(0)?.toUpperCase() || '?'}</span><strong>{item?.applicant?.fullname || 'Candidate'}</strong></div></TableCell>
+                                <TableCell>{item?.applicant?.email || '-'}</TableCell>
+                                <TableCell>{item?.applicant?.phoneNumber || '-'}</TableCell>
+                                <TableCell>{item?.createdAt ? new Date(item.createdAt).toLocaleDateString() : '-'}</TableCell>
                                 <TableCell>{getStatusBadge(item?.status)}</TableCell>
-                                <TableCell className="float-right cursor-pointer">
+                                <TableCell className="text-right">
                                     <Popover>
-                                        <PopoverTrigger>
-                                            <MoreHorizontal />
+                                        <PopoverTrigger asChild>
+                                            <button type="button" className="applicant-actions-trigger" aria-label={`Review ${item?.applicant?.fullname || 'candidate'}`}><MoreHorizontal size={18} /></button>
                                         </PopoverTrigger>
-                                        <PopoverContent className="w-32">
+                                        <PopoverContent align="end" className="w-40 applicant-actions-menu">
                                             {
                                                 shortlistingStatus.map((status, index) => {
                                                     return (
-                                                        <div onClick={() => statusHandler(status, item?._id)} key={index} className='flex w-fit items-center my-2 cursor-pointer'>
-                                                            <span>{status}</span>
-                                                        </div>
+                                                        <button type="button" disabled={updatingId === item?._id} onClick={() => statusHandler(status, item?._id)} key={index} className={`applicant-status-action ${status.toLowerCase()}`}>
+                                                            <span className="applicant-status-dot" />{status}
+                                                        </button>
                                                     )
                                                 })
                                             }
@@ -100,6 +105,7 @@ const ApplicantsTable = () => {
                 </TableBody>
 
             </Table>
+            </div>
         </div>
     )
 }

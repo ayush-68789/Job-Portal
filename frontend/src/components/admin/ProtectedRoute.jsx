@@ -3,15 +3,19 @@ import { useApp } from "@/context/AppContext";
 import { useNavigate } from "react-router-dom";
 
 const ProtectedRoute = ({children}) => {
-    const { user } = useApp();
+    const { user, isAuthChecking } = useApp();
 
     const navigate = useNavigate();
 
     useEffect(()=>{
-        if(user === null || user.role !== 'recruiter'){
+        if(!isAuthChecking && (user === null || user.role !== 'recruiter')){
             navigate("/");
         }
-    },[]);
+    },[user, isAuthChecking, navigate]);
+
+    if (isAuthChecking || user === null || user.role !== 'recruiter') {
+        return null;
+    }
 
     return (
         <>

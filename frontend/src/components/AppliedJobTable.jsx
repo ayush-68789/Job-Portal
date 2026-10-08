@@ -4,7 +4,7 @@ import { Badge } from './ui/badge'
 import { useApp } from '@/context/AppContext'
 import axios from 'axios'
 import { APPLICATION_API_END_POINT } from '@/utils/constant'
-import { toast } from 'sonner'
+import { toast } from 'react-toastify'
 import { Trash2 } from 'lucide-react'
 
 const AppliedJobTable = () => {

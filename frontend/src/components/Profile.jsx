@@ -18,9 +18,9 @@ const Profile = () => {
     const { user } = useApp();
 
     return (
-        <div>
+        <div className="app-page profile-page">
             <Navbar />
-            <div className='max-w-4xl mx-auto bg-white border border-gray-200 rounded-2xl my-5 p-8'>
+            <div className='profile-card'>
                 <div className='flex justify-between'>
                     <div className='flex items-center gap-4'>
                         <Avatar className="h-24 w-24">
@@ -52,7 +52,7 @@ const Profile = () => {
                     </div>
                 </div>
             </div>
-            <div className='max-w-4xl mx-auto bg-white rounded-2xl'>
+            <div className='profile-applications'>
                 <h1 className='font-bold text-lg my-5'>Applied Jobs</h1>
                 {/* Applied Job Table   */}
                 <AppliedJobTable />

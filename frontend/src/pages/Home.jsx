@@ -7,6 +7,7 @@ import Footer from '../components/shared/Footer'
 import useGetAllJobs from '@/hooks/useGetAllJobs'
 import { useApp } from '@/context/AppContext'
 import { useNavigate } from 'react-router-dom'
+import Jobs from './Jobs'
 
 const Home = () => {
     useGetAllJobs();
@@ -19,12 +20,16 @@ const Home = () => {
         }
     }, [user, navigate]);
 
+    if (user?.role === 'student') {
+        return <Jobs fetchJobs={false} />;
+    }
+
     return (
-        <div>
+        <div className="job-portal-home">
             <Navbar />
             <HeroSection />
-            <CategoryCarousel />
             <LatestJobs />
+            <CategoryCarousel />
             <Footer />
         </div>
     )

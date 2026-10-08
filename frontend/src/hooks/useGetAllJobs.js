@@ -3,10 +3,11 @@ import axios from 'axios'
 import { JOB_API_END_POINT } from '@/utils/constant'
 import { useApp } from '@/context/AppContext'
 
-const useGetAllJobs = () => {
+const useGetAllJobs = ({ enabled = true } = {}) => {
     const { setAllJobs, searchedQuery } = useApp();
 
     useEffect(() => {
+        if (!enabled) return;
         const fetchAllJobs = async () => {
             try {
                 const res = await axios.get(`${JOB_API_END_POINT}/get?keyword=${searchedQuery || ""}`, {
@@ -20,7 +21,7 @@ const useGetAllJobs = () => {
             }
         };
         fetchAllJobs();
-    }, [searchedQuery, setAllJobs]);
+    }, [enabled, searchedQuery, setAllJobs]);
 };
 
 export default useGetAllJobs;

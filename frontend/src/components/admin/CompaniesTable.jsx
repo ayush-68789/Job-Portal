@@ -7,7 +7,7 @@ import { useApp } from '@/context/AppContext'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { COMPANY_API_END_POINT } from '@/utils/constant'
-import { toast } from 'sonner'
+import { toast } from 'react-toastify'
 
 const CompaniesTable = () => {
     const { companies, setCompanies, searchCompanyByText } = useApp();

@@ -6,7 +6,7 @@ import { Button } from '../ui/button'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { COMPANY_API_END_POINT } from '@/utils/constant'
-import { toast } from 'sonner'
+import { toast } from 'react-toastify'
 import { useApp } from '@/context/AppContext'
 
 const CompanyCreate = () => {
@@ -29,12 +29,13 @@ const CompanyCreate = () => {
             }
         } catch (error) {
             console.log(error);
+            toast.error(error.response?.data?.message || "Failed to create company.");
         }
     }
     return (
-        <div>
+        <div className="app-page admin-page">
             <Navbar />
-            <div className='max-w-4xl mx-auto'>
+            <div className='admin-content company-create-card'>
                 <div className='my-10'>
                     <h1 className='font-bold text-2xl'>Your Company Name</h1>
                     <p className='text-gray-500'>What would you like to give your company name? you can change this later.</p>

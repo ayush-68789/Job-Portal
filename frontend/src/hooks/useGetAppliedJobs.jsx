@@ -3,22 +3,27 @@ import axios from "axios"
 import { useEffect } from "react"
 import { useApp } from "@/context/AppContext"
 
-const useGetAppliedJobs = () => {
+const useGetAppliedJobs = ({ enabled = true } = {}) => {
     const { setAllAppliedJobs } = useApp();
 
     useEffect(()=>{
+        if (!enabled) {
+            setAllAppliedJobs([]);
+            return;
+        }
+        let active = true;
         const fetchAppliedJobs = async () => {
             try {
                 const res = await axios.get(`${APPLICATION_API_END_POINT}/get`, {withCredentials:true});
-                console.log(res.data);
-                if(res.data.success){
+                if(active && res.data.success){
                     setAllAppliedJobs(res.data.application);
                 }
             } catch (error) {
-                console.log(error);
+                if(active) setAllAppliedJobs([]);
             }
         }
         fetchAppliedJobs();
-    },[])
+        return () => { active = false; };
+    },[enabled, setAllAppliedJobs])
 };
 export default useGetAppliedJobs;

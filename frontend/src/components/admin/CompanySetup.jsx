@@ -7,7 +7,7 @@ import { Input } from '../ui/input'
 import axios from 'axios'
 import { COMPANY_API_END_POINT } from '@/utils/constant'
 import { useNavigate, useParams } from 'react-router-dom'
-import { toast } from 'sonner'
+import { toast } from 'react-toastify'
 import { useApp } from '@/context/AppContext'
 import useGetCompanyById from '@/hooks/useGetCompanyById'
 
@@ -71,10 +71,10 @@ const CompanySetup = () => {
     },[singleCompany]);
 
     return (
-        <div>
+        <div className="app-page admin-page">
             <Navbar />
-            <div className='max-w-xl mx-auto my-10'>
-                <form onSubmit={submitHandler}>
+            <div className='admin-form-layout'>
+                <form onSubmit={submitHandler} className="admin-form-card">
                     <div className='flex items-center gap-5 p-8'>
                         <Button onClick={() => navigate("/admin/companies")} variant="outline" className="flex items-center gap-2 text-gray-500 font-semibold">
                             <ArrowLeft />

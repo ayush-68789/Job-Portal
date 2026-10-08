@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import { useEffect, useState } from 'react'
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from '../ui/table'
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover'
 import { Edit2, Eye, MoreHorizontal, Trash2, PowerOff, Power } from 'lucide-react'
@@ -6,7 +6,7 @@ import { useApp } from '@/context/AppContext'
 import { useNavigate } from 'react-router-dom'
 import axios from 'axios'
 import { JOB_API_END_POINT } from '@/utils/constant'
-import { toast } from 'sonner'
+import { toast } from 'react-toastify'
 
 const AdminJobsTable = () => {
     const { allAdminJobs, setAllAdminJobs, searchJobByText } = useApp();
@@ -78,7 +78,7 @@ const AdminJobsTable = () => {
                                     <Popover>
                                         <PopoverTrigger><MoreHorizontal /></PopoverTrigger>
                                         <PopoverContent className="w-40">
-                                            <div onClick={() => navigate(`/admin/companies/${job._id}`)} className='flex items-center gap-2 w-fit cursor-pointer py-1'>
+                                            <div onClick={() => navigate(`/admin/jobs/${job._id}/edit`)} className='flex items-center gap-2 w-fit cursor-pointer py-1'>
                                                 <Edit2 className='w-4' />
                                                 <span>Edit</span>
                                             </div>
